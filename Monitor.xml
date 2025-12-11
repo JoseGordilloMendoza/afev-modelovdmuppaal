@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Variables globales
+int contador_riesgo = 0;
+bool evento_negativo;</declaration>
+	<template>
+		<name>Monitor</name>
+		<declaration>// Declaraciones locales del template</declaration>
+		<location id="id0" x="-144" y="-64">
+			<name x="-238" y="-68">monitoreo</name>
+		</location>
+		<location id="id1" x="144" y="-64">
+			<name x="161" y="-76">riesgo_detectado</name>
+		</location>
+		<location id="id2" x="144" y="128">
+			<name x="8" y="102">alerta_generada</name>
+		</location>
+		<init ref="id0"/>
+		<transition id="id3">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-314" y="-127">!evento_negativo</label>
+			<label kind="assignment" x="-314" y="-110">contador_riesgo = 0</label>
+			<nail x="-153" y="-110"/>
+			<nail x="-127" y="-110"/>
+		</transition>
+		<transition id="id4">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-51" y="-127">evento_negativo</label>
+			<label kind="assignment" x="-68" y="-110">contador_riesgo = 1</label>
+			<nail x="-127" y="-76"/>
+			<nail x="136" y="-76"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-51" y="-51">!evento_negativo</label>
+			<label kind="assignment" x="-59" y="-34">contador_riesgo = 0</label>
+			<nail x="127" y="-59"/>
+			<nail x="-127" y="-59"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="93" y="-170">evento_negativo &amp;&amp; 
+contador_riesgo &lt; 2</label>
+			<label kind="assignment" x="102" y="-127">contador_riesgo++</label>
+			<nail x="161" y="-102"/>
+			<nail x="144" y="-110"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="161" y="-17">evento_negativo &amp;&amp; 
+contador_riesgo == 2</label>
+			<label kind="assignment" x="161" y="34">contador_riesgo = 3</label>
+		</transition>
+		<transition id="id8">
+			<source ref="id2"/>
+			<target ref="id2"/>
+			<label kind="comments" x="178" y="153">Permanece en alerta</label>
+			<nail x="170" y="153"/>
+			<nail x="170" y="178"/>
+			<nail x="144" y="187"/>
+			<nail x="119" y="161"/>
+		</transition>
+	</template>
+	<template>
+		<name>Entorno</name>
+		<declaration>// Simula eventos aleatorios
+clock t;</declaration>
+		<location id="id9" x="0" y="0">
+			<name x="25" y="-17">generador</name>
+			<label kind="invariant" x="-68" y="-8">t &lt;= 1</label>
+		</location>
+		<init ref="id9"/>
+		<transition id="id10">
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-42" y="-127">t &gt;= 1</label>
+			<label kind="assignment" x="-102" y="-110">evento_negativo = true,
+t = 0</label>
+			<nail x="-80" y="-64"/>
+			<nail x="80" y="-64"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-25" y="68">t &gt;= 1</label>
+			<label kind="assignment" x="-93" y="93">evento_negativo = false,
+t = 0</label>
+			<nail x="-80" y="64"/>
+			<nail x="80" y="64"/>
+		</transition>
+	</template>
+	<system>// Instanciación de los templates
+system Monitor, Entorno;</system>
+	<queries>
+		<query>
+			<formula>A[] (Monitor.alerta_generada imply contador_riesgo == 3)</formula>
+			<comment>Verifica que solo se genera alerta cuando el contador llega a 3</comment>
+			<result outcome="success" type="quality" timestamp="2025-12-03 01:38:43 -0500">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Monitor.alerta_generada</formula>
+			<comment>Verifica que el sistema puede alcanzar el estado de alerta</comment>
+			<result outcome="success" type="quality" timestamp="2025-12-03 01:38:54 -0500">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (Monitor.riesgo_detectado and contador_riesgo &gt; 0)</formula>
+			<comment>Verifica que es posible detectar riesgo</comment>
+			<result outcome="success" type="quality" timestamp="2025-12-03 01:39:44 -0500">
+			</result>
+		</query>
+		<query>
+			<formula>A[] (contador_riesgo &lt;= 3)</formula>
+			<comment>Garantiza que el contador está acotado</comment>
+			<result outcome="success" type="quality" timestamp="2025-12-03 01:41:20 -0500">
+			</result>
+		</query>
+	</queries>
+</nta>
