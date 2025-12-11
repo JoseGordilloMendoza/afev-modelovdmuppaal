@@ -1,0 +1,63 @@
+class ControladorRecursos
+
+types
+    public UserID = token;
+    public Estado = <DISPONIBLE> | <ASIGNADO>;
+
+instance variables
+    public status : Estado;
+    public current_user : [UserID];
+    public request_queue : seq of UserID;
+
+operations
+
+    public ControladorRecursos: () ==> ControladorRecursos
+    ControladorRecursos() == (
+        status := <DISPONIBLE>;
+        current_user := nil;
+        request_queue := [];
+    );
+
+    public Solicitar: UserID ==> ()
+    Solicitar(u) == (
+        request_queue := request_queue ^ [u];
+    );
+
+    public AsignarRecurso: () ==> ()
+    AsignarRecurso() == (
+        dcl solicitante : UserID := hd request_queue;
+        status := <ASIGNADO>;
+        current_user := solicitante;
+        request_queue := tl request_queue;
+    )
+    pre status = <DISPONIBLE> 
+    and request_queue <> [];
+
+    public LiberarRecurso: UserID ==> ()
+    LiberarRecurso(u) == (
+        status := <DISPONIBLE>;
+        current_user := nil;
+    )
+    pre status = <ASIGNADO> 
+    and current_user = u;
+
+    public GetStatus: () ==> Estado
+    GetStatus() == return status;
+
+    public GetUser: () ==> [UserID]
+    GetUser() == return current_user;
+
+    public EjecutarSimulacion: () ==> seq of char
+    EjecutarSimulacion() == (
+        Solicitar(mk_token("Usuario1"));
+        Solicitar(mk_token("Usuario2"));
+        
+        AsignarRecurso(); 
+        
+        LiberarRecurso(mk_token("Usuario1")); 
+        
+        AsignarRecurso();
+        
+        return "Simulacion Exitosa: Usuario1 -> Libera -> Usuario2 Asignado";
+    );
+end ControladorRecursos
